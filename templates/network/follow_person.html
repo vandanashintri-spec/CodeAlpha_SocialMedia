@@ -1,0 +1,22 @@
+<article class="follow-person card">
+  <a class="follow-person-avatar" href="{% url 'profile' person.username %}" aria-label="View @{{ person.username }}'s profile">
+    {% if person.profile.image %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}
+  </a>
+  <div class="follow-person-info">
+    <a class="follow-person-name" href="{% url 'profile' person.username %}">{{ person.username }}</a>
+    <span class="follow-person-handle">@{{ person.username }}</span>
+    {% if person.profile.bio %}<p>{{ person.profile.bio }}</p>{% else %}<p class="follow-person-muted">A Connect community member.</p>{% endif %}
+  </div>
+  {% if user.is_authenticated and user != person %}
+    <form method="post" action="{% url 'toggle_follow' person.username %}" class="follow-person-action">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <input type="hidden" name="action" value="{% if person.pk in followed_ids %}unfollow{% else %}follow{% endif %}">
+      <button class="button {% if person.pk in followed_ids %}button-outline{% endif %}" type="submit">
+        {% if person.pk in followed_ids %}Unfollow{% elif list_type == "followers" %}Follow Back{% else %}Follow{% endif %}
+      </button>
+    </form>
+  {% elif not user.is_authenticated %}
+    <a class="button button-outline" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to follow</a>
+  {% endif %}
+</article>

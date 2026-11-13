@@ -1,0 +1,12 @@
+.venv/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+db.sqlite3
+*.sqlite3*
+media/
+media-pre-transfer/
+connect-data*.json
+staticfiles/

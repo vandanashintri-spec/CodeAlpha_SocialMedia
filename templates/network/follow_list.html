@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ list_type|title }} · @{{ profile_user.username }}{% endblock %}
+{% block content %}
+<header class="follow-list-header">
+  <a class="back-link" href="{% url 'profile' profile_user.username %}">← Back to profile</a>
+  <p class="eyebrow">{% if list_type == "followers" %}THE PEOPLE WHO FOUND {{ profile_user.username|upper }}{% else %}PEOPLE {{ profile_user.username|upper }} FINDS INSPIRING{% endif %}</p>
+  <h1>{% if list_type == "followers" %}Followers{% else %}Following{% endif %}</h1>
+  <p class="follow-list-subtitle">@{{ profile_user.username }} · {{ relationships|length }} {% if list_type == "followers" %}follower{% else %}following{% endif %}{{ relationships|length|pluralize }}</p>
+  <nav class="follow-tabs" aria-label="Profile connections">
+    <a class="{% if list_type == 'followers' %}active{% endif %}" href="{% url 'followers' profile_user.username %}">Followers <span>{{ profile_user.followers.count }}</span></a>
+    <a class="{% if list_type == 'following' %}active{% endif %}" href="{% url 'following' profile_user.username %}">Following <span>{{ profile_user.following.count }}</span></a>
+  </nav>
+</header>
+<section class="follow-list">
+  {% for relationship in relationships %}
+    {% if list_type == "followers" %}
+      {% with person=relationship.follower %}
+        {% include "network/follow_person.html" %}
+      {% endwith %}
+    {% else %}
+      {% with person=relationship.following %}
+        {% include "network/follow_person.html" %}
+      {% endwith %}
+    {% endif %}
+  {% empty %}
+    <div class="empty-state card">
+      <div class="empty-icon">{% if list_type == "followers" %}♡{% else %}✦{% endif %}</div>
+      {% if list_type == "followers" %}
+        <h3>No followers just yet.</h3>
+        <p>When people follow @{{ profile_user.username }}, they’ll show up here.</p>
+      {% else %}
+        <h3>Not following anyone yet.</h3>
+        <p>People @{{ profile_user.username }} follows will show up here.</p>
+        {% if user == profile_user %}<a class="button" href="{% url 'discover' %}">Discover people</a>{% endif %}
+      {% endif %}
+    </div>
+  {% endfor %}
+</section>
+{% endblock %}

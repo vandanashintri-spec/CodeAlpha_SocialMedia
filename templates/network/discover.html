@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Discover people{% endblock %}
+{% block content %}
+<header class="discover-header"><p class="eyebrow">FIND YOUR CORNER OF THE INTERNET</p><h1>People make the place.</h1><p>Meet the people sharing ideas, moments, and good energy.</p></header>
+<form class="discover-search card" method="get" action="{% url 'discover' %}">
+  <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>
+  <label class="sr-only" for="people-search">Search usernames</label>
+  <input id="people-search" type="search" name="q" value="{{ query }}" placeholder="Search people by username..." autocomplete="off">
+  {% if query %}<a class="search-clear" href="{% url 'discover' %}">Clear</a>{% endif %}
+  <button class="button" type="submit">Search</button>
+</form>
+<div class="discover-results-heading"><div><p class="eyebrow">{% if query %}SEARCH RESULTS{% else %}THE COMMUNITY{% endif %}</p><h2>{% if query %}People matching “{{ query }}”{% else %}People to discover{% endif %}</h2></div><span>{{ users|length }} people</span></div>
+<section class="people-grid">
+  {% for person in users %}
+  <article class="person-card card">
+    <a class="person-cover" href="{% url 'profile' person.username %}"><span class="person-spark">✦</span></a>
+    <a class="person-avatar" href="{% url 'profile' person.username %}">{% if person.profile.image %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}</a>
+    <div class="person-details">
+      <a class="person-name" href="{% url 'profile' person.username %}">{{ person.username }}</a>
+      <span class="person-handle">@{{ person.username }}</span>
+      {% if person.profile.bio %}<p>{{ person.profile.bio|truncatechars:82 }}</p>{% else %}<p class="person-no-bio">A Connect community member.</p>{% endif %}
+      <div class="person-stats"><span><strong>{{ person.posts_total }}</strong> posts</span><span><strong>{{ person.followers_total }}</strong> followers</span></div>
+      {% if user.is_authenticated %}
+        {% if person.pk in followed_ids %}
+          <form method="post" action="{% url 'toggle_follow' person.username %}">{% csrf_token %}<input type="hidden" name="action" value="unfollow"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button button-outline follow-wide" type="submit">Following · unfollow</button></form>
+        {% else %}
+          <form method="post" action="{% url 'toggle_follow' person.username %}">{% csrf_token %}<input type="hidden" name="action" value="follow"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="button follow-wide" type="submit">＋ Follow</button></form>
+        {% endif %}
+      {% else %}<a class="button follow-wide" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in to follow</a>{% endif %}
+    </div>
+  </article>
+  {% empty %}
+  <div class="empty-state card"><div class="empty-icon">⌕</div><h3>No people found.</h3><p>Try a different username or clear your search.</p><a class="button button-outline" href="{% url 'discover' %}">See everyone</a></div>
+  {% endfor %}
+</section>
+{% endblock %}

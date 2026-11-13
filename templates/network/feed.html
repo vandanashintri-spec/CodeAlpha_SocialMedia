@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Discover{% endblock %}
+{% block content %}
+<div class="content-grid">
+  <section class="feed-column">
+    {% if user.is_authenticated %}
+    <form class="composer card" id="share-post" action="{% url 'create_post' %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <a class="avatar" href="{% url 'profile' user.username %}">{% if user.profile.image %}<img src="{{ user.profile.image.url }}" alt="">{% else %}{{ user.username|first|upper }}{% endif %}</a>
+      <div class="composer-body"><div class="composer-prompt"><span>Share a moment with your community</span><span class="composer-spark">✦</span></div>{{ post_form.content }}{% if post_form.content.errors %}<div class="field-errors">{{ post_form.content.errors }}</div>{% endif %}{% if post_form.image.errors %}<div class="field-errors">{{ post_form.image.errors }}</div>{% endif %}<div class="image-preview" data-image-preview hidden><img alt="Selected image preview"><button type="button" data-remove-image aria-label="Remove selected image">×</button></div><div class="composer-bottom"><label class="image-picker" for="id_image"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span>Add a photo</span>{{ post_form.image }}</label><button class="button" type="submit">Share post <span>↗</span></button></div></div>
+    </form>
+    {% else %}
+    <div class="welcome-banner"><div class="welcome-copy"><span class="eyebrow">YOUR COMMUNITY, YOUR MOMENT</span><h1>Good things happen<br>when we <em>connect.</em></h1><p>Ideas, little wins, and everyday moments — all in one place.</p><a class="button" href="{% url 'signup' %}">Find your people <span>↗</span></a></div><div class="welcome-art" aria-hidden="true"><div class="welcome-sun">✦</div><div class="welcome-circle">c</div><span class="welcome-heart">♡</span></div></div>
+    {% endif %}
+    <div class="feed-heading"><div><p class="eyebrow">YOUR DAILY DOSE OF GOOD</p><h1>Community feed</h1></div><a class="feed-discover-link" href="{% url 'discover' %}">Find your people <span>→</span></a></div>
+    {% for post in posts %}
+      {% include "network/post_card.html" with post=post %}
+    {% empty %}
+      <div class="empty-state card"><div class="empty-icon">✦</div><h3>It’s quiet in here.</h3><p>Be the first to share something with the community.</p>{% if user.is_authenticated %}<a class="button" href="#share-post">Share the first post</a>{% else %}<a class="button" href="{% url 'signup' %}">Join the conversation</a>{% endif %}</div>
+    {% endfor %}
+  </section>
+  <aside class="sidebar">
+    <div class="side-card card"><div class="side-heading"><div><p class="eyebrow">GOOD COMPANY</p><h3>People to know</h3></div><a href="{% url 'discover' %}">See all</a></div>{% for person in people_to_follow %}<div class="suggested-person"><a class="avatar" href="{% url 'profile' person.username %}">{% if person.profile.image %}<img src="{{ person.profile.image.url }}" alt="">{% else %}{{ person.username|first|upper }}{% endif %}</a><div class="suggested-copy"><a href="{% url 'profile' person.username %}">@{{ person.username }}</a><span>{{ person.followers_total }} follower{{ person.followers_total|pluralize }}</span></div>{% if user.is_authenticated %}<form method="post" action="{% url 'toggle_follow' person.username %}">{% csrf_token %}<input type="hidden" name="action" value="follow"><input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="mini-follow" type="submit" aria-label="Follow @{{ person.username }}">+</button></form>{% else %}<a class="mini-follow" href="{% url 'login' %}" aria-label="Log in to follow @{{ person.username }}">+</a>{% endif %}</div>{% empty %}<p class="side-empty">No suggestions just yet. Check back soon.</p>{% endfor %}<a class="text-link" href="{% url 'discover' %}">Discover the community <span>→</span></a></div>
+    <div class="quote-card"><span class="quote-mark">“</span><p>Somewhere, someone is having a day that your words could make better.</p><span class="quote-signature">A little reminder</span></div>
+  </aside>
+</div>
+{% endblock %}

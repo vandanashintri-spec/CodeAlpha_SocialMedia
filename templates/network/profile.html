@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}@{{ profile_user.username }}{% endblock %}
+{% block content %}
+<section class="profile-cover"><div class="cover-orb cover-orb-one"></div><div class="cover-orb cover-orb-two"></div><span class="cover-spark">✦</span></section>
+<section class="profile-card card">
+  <div class="profile-top">
+    <div class="profile-avatar">{% if profile_user.profile.image %}<img src="{{ profile_user.profile.image.url }}" alt="Profile picture of {{ profile_user.username }}">{% else %}{{ profile_user.username|first|upper }}{% endif %}</div>
+    {% if user == profile_user %}<a class="button button-outline" href="{% url 'edit_profile' %}">Edit profile</a>{% elif user.is_authenticated %}<form method="post" action="{% url 'toggle_follow' profile_user.username %}">{% csrf_token %}<input type="hidden" name="action" value="{% if is_following %}unfollow{% else %}follow{% endif %}"><button class="button {% if is_following %}button-outline{% endif %}" type="submit">{% if is_following %}Following · unfollow{% else %}＋ Follow{% endif %}</button></form>{% endif %}
+  </div>
+  <h1>{{ profile_user.username }}</h1>
+  <p class="profile-email">@{{ profile_user.username }}</p>
+  {% if profile_user.profile.bio %}<p class="profile-bio">{{ profile_user.profile.bio|linebreaksbr }}</p>{% else %}<p class="profile-bio muted">This person is keeping their introduction a mystery.</p>{% endif %}
+  <div class="profile-stats">
+    <a class="profile-stat" href="#user-posts"><strong>{{ posts_count }}</strong><span>posts</span></a>
+    <a class="profile-stat" href="{% url 'followers' profile_user.username %}"><strong>{{ followers_count }}</strong><span>followers</span></a>
+    <a class="profile-stat" href="{% url 'following' profile_user.username %}"><strong>{{ following_count }}</strong><span>following</span></a>
+  </div>
+</section>
+<div class="profile-feed" id="user-posts"><div class="feed-heading"><div><p class="eyebrow">A LITTLE BIT OF {{ profile_user.username|upper }}</p><h2>Posts</h2></div><span class="post-count">{{ posts_count }} post{{ posts_count|pluralize }}</span></div>
+<div class="profile-grid">{% for post in posts %}{% include "network/post_card.html" with post=post %}{% empty %}<div class="empty-state card"><div class="empty-icon">✦</div><h3>No posts just yet.</h3><p>When {{ profile_user.username }} shares, you’ll find it here.</p>{% if user == profile_user %}<a class="button" href="{% url 'feed' %}#share-post">Share your first post</a>{% endif %}</div>{% endfor %}</div></div>
+{% endblock %}

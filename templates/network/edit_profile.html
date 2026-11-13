@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}Edit profile{% endblock %}
+{% block content %}
+<div class="form-page"><div class="form-card card"><p class="eyebrow">YOUR SPACE, YOUR STORY</p><h1>Edit your profile</h1><p class="form-intro">A few details help people get to know you.</p><form method="post" enctype="multipart/form-data">{% csrf_token %}<h3>Account details</h3>{{ user_form.as_p }}<h3>About you</h3>{{ profile_form.as_p }}<div class="form-actions"><a class="button button-outline" href="{% url 'profile' user.username %}">Cancel</a><button class="button" type="submit">Save changes <span>↗</span></button></div></form></div></div>
+{% endblock %}

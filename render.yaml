@@ -1,0 +1,52 @@
+services:
+  - type: web
+    name: connect
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --no-input
+    preDeployCommand: python manage.py migrate
+    startCommand: gunicorn social_site.wsgi:application
+    healthCheckPath: /
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: connect-db
+          property: connectionString
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_CUSTOM_DOMAIN
+        sync: false
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_USE_SSL
+        value: "False"
+      - key: EMAIL_TIMEOUT
+        value: "10"
+
+databases:
+  - name: connect-db
+    plan: basic-256mb
+    databaseName: connect
+    user: connect_user

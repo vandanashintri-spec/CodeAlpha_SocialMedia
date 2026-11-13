@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Verify your email{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <section class="auth-card">
+    <div class="auth-mark">c</div>
+    <p class="eyebrow">ONE QUICK STEP</p>
+    <h1>Check your inbox.</h1>
+    <p class="form-intro">Verify your email to join the Connect community. The link expires after 24 hours.</p>
+    <form method="post" action="{% url 'resend_verification' %}">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button button-wide" type="submit">Resend verification link</button>
+    </form>
+    <p class="auth-switch">Already verified? <a href="{% url 'login' %}">Log in</a></p>
+  </section>
+</div>
+{% endblock %}

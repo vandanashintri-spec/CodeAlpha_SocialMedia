@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="form-page"><div class="form-card card"><p class="eyebrow">YOUR VOICE MATTERS</p><h1>{{ title }}</h1><p class="form-intro">Share a thought, a moment, or something that made you smile.</p><form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<div class="form-actions"><a class="button button-outline" href="{% url 'feed' %}">Cancel</a><button class="button" type="submit">Save post <span>↗</span></button></div></form></div></div>
+{% endblock %}
