@@ -29,7 +29,7 @@
       {% if user.is_authenticated %}
         <a class="sidebar-create" href="{% url 'feed' %}#share-post"><span>＋</span> Create a post</a>
         <div class="sidebar-spacer"></div>
-        <a class="sidebar-user" href="{% url 'profile' user.username %}"><span class="avatar">{% if user.profile.image %}<img src="{{ user.profile.image.url }}" alt="">{% else %}{{ user.username|first|upper }}{% endif %}</span><span class="sidebar-user-copy"><strong>{{ user.username }}</strong><small>View your profile</small></span><span class="user-arrow">↗</span></a>
+        <a class="sidebar-user" href="{% url 'profile' user.username %}"><span class="avatar">{% if user.profile.image|media_exists %}<img src="{{ user.profile.image.url }}" alt="">{% else %}{{ user.username|first|upper }}{% endif %}</span><span class="sidebar-user-copy"><strong>{{ user.username }}</strong><small>View your profile</small></span><span class="user-arrow">↗</span></a>
         <form action="{% url 'logout' %}" method="post" class="sidebar-logout">{% csrf_token %}<button type="submit"><span>↪</span> Log out</button></form>
       {% else %}
         <div class="sidebar-spacer"></div>
@@ -38,7 +38,7 @@
       <div class="sidebar-footer">A little more connected, every day.<br><span>© {% now "Y" %} Connect</span></div>
     </aside>
     <div class="main-column">
-      <header class="mobile-header"><a class="brand" href="{% url 'feed' %}"><span class="brand-mark">c</span><span>connect</span></a>{% if user.is_authenticated %}<div class="mobile-account"><a class="avatar" href="{% url 'profile' user.username %}" aria-label="Your profile">{% if user.profile.image %}<img src="{{ user.profile.image.url }}" alt="">{% else %}{{ user.username|first|upper }}{% endif %}</a><form action="{% url 'logout' %}" method="post" class="mobile-logout">{% csrf_token %}<button type="submit" aria-label="Log out" title="Log out"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3m9-8h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-8"/></svg></button></form></div>{% else %}<a class="mobile-login" href="{% url 'login' %}">Log in</a>{% endif %}</header>
+      <header class="mobile-header"><a class="brand" href="{% url 'feed' %}"><span class="brand-mark">c</span><span>connect</span></a>{% if user.is_authenticated %}<div class="mobile-account"><a class="avatar" href="{% url 'profile' user.username %}" aria-label="Your profile">{% if user.profile.image|media_exists %}<img src="{{ user.profile.image.url }}" alt="">{% else %}{{ user.username|first|upper }}{% endif %}</a><form action="{% url 'logout' %}" method="post" class="mobile-logout">{% csrf_token %}<button type="submit" aria-label="Log out" title="Log out"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3m9-8h8a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-8"/></svg></button></form></div>{% else %}<a class="mobile-login" href="{% url 'login' %}">Log in</a>{% endif %}</header>
       <main class="page-shell">
         {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
         {% block content %}{% endblock %}

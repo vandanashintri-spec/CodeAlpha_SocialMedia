@@ -108,6 +108,7 @@ button { color: inherit; }
 .post-content { padding: 13px 1px 14px; color: #414354; font-size: 12px; line-height: 1.75; overflow-wrap: anywhere; }
 .post-media { overflow: hidden; margin: 0 -17px; background: #f1f0f5; }
 .post-media img { display: block; width: 100%; max-height: 470px; object-fit: cover; }
+.post-media-unavailable { padding: 2rem; color: #77718a; text-align: center; }
 .post-actions { display: flex; align-items: center; gap: 19px; padding: 12px 0 11px; border-bottom: 1px solid #f0eff4; }
 .post-actions form { margin: 0; }
 .action-button { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #797b8d; font-size: 10px; cursor: pointer; }

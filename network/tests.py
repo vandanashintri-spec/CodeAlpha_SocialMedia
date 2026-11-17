@@ -210,7 +210,7 @@ class SocialNetworkTests(TestCase):
         Image.new("RGB", (8, 8), color="purple").save(image_bytes, format="PNG")
         self.client.force_login(self.alice)
         with TemporaryDirectory() as media_root:
-            with override_settings(MEDIA_ROOT=media_root):
+            with override_settings(MEDIA_ROOT=media_root, DEBUG=False):
                 image = SimpleUploadedFile(
                     "profile.png", image_bytes.getvalue(), content_type="image/png"
                 )
@@ -228,6 +228,13 @@ class SocialNetworkTests(TestCase):
                 self.assertEqual(self.alice.email, "alice-new@example.com")
                 self.assertEqual(self.alice.profile.bio, "Hello from Connect.")
                 self.assertTrue(self.alice.profile.image.name.startswith("profiles/"))
+                self.assertTrue(self.alice.profile.image.url.startswith("/media/"))
+                media_response = self.client.get(self.alice.profile.image.url)
+                self.assertEqual(media_response.status_code, 200)
+                self.assertEqual(
+                    b"".join(media_response.streaming_content), image_bytes.getvalue()
+                )
+                media_response.close()
 
     def test_profile_upload_storage_failure_is_reported_without_partial_account_update(self):
         self.client.force_login(self.alice)
@@ -684,7 +691,7 @@ class SocialNetworkTests(TestCase):
         Image.new("RGB", (4, 4), color="purple").save(image_bytes, format="PNG")
         self.client.force_login(self.alice)
         with TemporaryDirectory() as media_root:
-            with override_settings(MEDIA_ROOT=media_root):
+            with override_settings(MEDIA_ROOT=media_root, DEBUG=False):
                 image = SimpleUploadedFile(
                     "moment.png", image_bytes.getvalue(), content_type="image/png"
                 )
@@ -693,9 +700,29 @@ class SocialNetworkTests(TestCase):
                     {"content": "A picture!", "image": image},
                 )
                 self.assertRedirects(response, reverse("feed"))
-                self.assertTrue(
-                    Post.objects.get(content="A picture!").image.name.startswith("posts/")
+                post = Post.objects.get(content="A picture!")
+                self.assertTrue(post.image.name.startswith("posts/"))
+                self.assertTrue(post.image.url.startswith("/media/"))
+                media_response = self.client.get(post.image.url)
+                self.assertEqual(media_response.status_code, 200)
+                self.assertEqual(
+                    b"".join(media_response.streaming_content), image_bytes.getvalue()
                 )
+                media_response.close()
+
+    def test_templates_fallback_when_uploaded_images_are_missing(self):
+        self.alice.profile.image.name = "profiles/missing.png"
+        self.alice.profile.save(update_fields=["image"])
+        self.post.image.name = "posts/missing.png"
+        self.post.save(update_fields=["image"])
+
+        response = self.client.get(reverse("feed"))
+        self.assertContains(response, "Photo unavailable")
+        self.assertNotContains(response, 'src="/media/posts/missing.png"')
+        self.assertNotContains(response, 'src="/media/profiles/missing.png"')
+
+        response = self.client.get(reverse("profile", args=["alice"]))
+        self.assertNotContains(response, 'src="/media/profiles/missing.png"')
 
     def test_image_only_post_is_not_accepted_without_content(self):
         from io import BytesIO

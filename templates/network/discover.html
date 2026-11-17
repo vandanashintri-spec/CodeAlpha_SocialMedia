@@ -14,7 +14,7 @@
   {% for person in users %}
   <article class="person-card card">
     <a class="person-cover" href="{% url 'profile' person.username %}"><span class="person-spark">✦</span></a>
-    <a class="person-avatar" href="{% url 'profile' person.username %}">{% if person.profile.image %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}</a>
+    <a class="person-avatar" href="{% url 'profile' person.username %}">{% if person.profile.image|media_exists %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}</a>
     <div class="person-details">
       <a class="person-name" href="{% url 'profile' person.username %}">{{ person.username }}</a>
       <span class="person-handle">@{{ person.username }}</span>

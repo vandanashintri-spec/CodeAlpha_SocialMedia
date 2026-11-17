@@ -1,6 +1,6 @@
 <article class="follow-person card">
   <a class="follow-person-avatar" href="{% url 'profile' person.username %}" aria-label="View @{{ person.username }}'s profile">
-    {% if person.profile.image %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}
+    {% if person.profile.image|media_exists %}<img src="{{ person.profile.image.url }}" alt="Profile picture of {{ person.username }}">{% else %}{{ person.username|first|upper }}{% endif %}
   </a>
   <div class="follow-person-info">
     <a class="follow-person-name" href="{% url 'profile' person.username %}">{{ person.username }}</a>

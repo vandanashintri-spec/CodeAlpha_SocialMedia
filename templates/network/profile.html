@@ -4,7 +4,7 @@
 <section class="profile-cover"><div class="cover-orb cover-orb-one"></div><div class="cover-orb cover-orb-two"></div><span class="cover-spark">✦</span></section>
 <section class="profile-card card">
   <div class="profile-top">
-    <div class="profile-avatar">{% if profile_user.profile.image %}<img src="{{ profile_user.profile.image.url }}" alt="Profile picture of {{ profile_user.username }}">{% else %}{{ profile_user.username|first|upper }}{% endif %}</div>
+    <div class="profile-avatar">{% if profile_user.profile.image|media_exists %}<img src="{{ profile_user.profile.image.url }}" alt="Profile picture of {{ profile_user.username }}">{% else %}{{ profile_user.username|first|upper }}{% endif %}</div>
     {% if user == profile_user %}<a class="button button-outline" href="{% url 'edit_profile' %}">Edit profile</a>{% elif user.is_authenticated %}<form method="post" action="{% url 'toggle_follow' profile_user.username %}">{% csrf_token %}<input type="hidden" name="action" value="{% if is_following %}unfollow{% else %}follow{% endif %}"><button class="button {% if is_following %}button-outline{% endif %}" type="submit">{% if is_following %}Following · unfollow{% else %}＋ Follow{% endif %}</button></form>{% endif %}
   </div>
   <h1>{{ profile_user.username }}</h1>
