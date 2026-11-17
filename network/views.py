@@ -70,29 +70,22 @@ def feed(request):
     )
 
 
+
 def signup(request):
     if request.user.is_authenticated:
         return redirect("feed")
+
     form = SignUpForm(request.POST or None)
+
     if request.method == "POST" and form.is_valid():
         user = form.save()
-        user.profile.email_verified = False
+        user.profile.email_verified = True
         user.profile.save(update_fields=["email_verified"])
-        request.session["pending_verification_email"] = user.email
-        try:
-            send_verification_email(user, request)
-        except (OSError, SMTPException):
-            messages.error(
-                request,
-                "Your account was created, but the verification email could not be sent. Please try resending it.",
-            )
-        else:
-            messages.success(
-                request, "Check your email for a link to verify your Connect account."
-            )
-        return redirect("verification_pending")
-    return render(request, "registration/signup.html", {"form": form})
 
+        messages.success(request, "Your Connect account was created successfully. You can now log in.")
+        return redirect("login")
+
+    return render(request, "registration/signup.html", {"form": form})
 
 def verification_pending(request):
     initial_email = request.session.get("pending_verification_email", "")

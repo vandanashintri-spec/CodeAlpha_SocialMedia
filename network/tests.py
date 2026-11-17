@@ -54,17 +54,12 @@ class SocialNetworkTests(TestCase):
                 "password2": "StrongPass123!xyz",
             },
         )
-        self.assertRedirects(response, reverse("verification_pending"))
+        self.assertRedirects(response, reverse("login"))
         user = User.objects.get(username="diana")
         self.assertTrue(hasattr(user, "profile"))
-        self.assertFalse(user.profile.email_verified)
-        self.assertNotIn("_auth_user_id", self.client.session)
-        self.assertEqual(len(mail.outbox), 1)
-        verification_path = self._email_path(mail.outbox[-1].body)
-        response = self.client.get(verification_path)
-        self.assertRedirects(response, reverse("login"))
-        user.profile.refresh_from_db()
         self.assertTrue(user.profile.email_verified)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertEqual(len(mail.outbox), 0)
         self.assertTrue(self.client.login(username="diana", password="StrongPass123!xyz"))
 
         self.client.post(reverse("logout"))
@@ -134,11 +129,10 @@ class SocialNetworkTests(TestCase):
         self.bob.profile.refresh_from_db()
         self.assertFalse(self.bob.profile.email_verified)
 
-    def test_verification_email_failure_keeps_account_unverified_and_retryable(self):
+    def test_signup_does_not_send_verification_email(self):
         with patch(
             "network.views.send_verification_email",
-            side_effect=OSError("private SMTP diagnostic"),
-        ):
+        ) as send_email:
             response = self.client.post(
                 reverse("signup"),
                 {
@@ -148,14 +142,11 @@ class SocialNetworkTests(TestCase):
                     "password2": "StrongPass123!xyz",
                 },
             )
-        self.assertRedirects(response, reverse("verification_pending"))
+        self.assertRedirects(response, reverse("login"))
+        send_email.assert_not_called()
         user = User.objects.get(username="diana")
-        self.assertFalse(user.profile.email_verified)
-        response = self.client.post(
-            reverse("resend_verification"), {"email": user.email}
-        )
-        self.assertRedirects(response, reverse("verification_pending"))
-        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(user.profile.email_verified)
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_complete_password_reset_flow(self):
         response = self.client.post(

@@ -116,42 +116,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", str(BASE_DIR / "media")))
 
-default_storage = {
-    "BACKEND": "django.core.files.storage.FileSystemStorage"
-}
-if not DEBUG:
-    s3_required_settings = (
-        "AWS_STORAGE_BUCKET_NAME",
-        "AWS_S3_REGION_NAME",
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-    )
-    missing_s3_settings = [
-        name for name in s3_required_settings if not os.environ.get(name)
-    ]
-    if missing_s3_settings:
-        raise RuntimeError(
-            "Configure production object storage settings: "
-            + ", ".join(missing_s3_settings)
-        )
-    default_storage = {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "bucket_name": os.environ["AWS_STORAGE_BUCKET_NAME"],
-            "region_name": os.environ["AWS_S3_REGION_NAME"],
-            "access_key": os.environ["AWS_ACCESS_KEY_ID"],
-            "secret_key": os.environ["AWS_SECRET_ACCESS_KEY"],
-            "endpoint_url": os.environ.get("AWS_S3_ENDPOINT_URL") or None,
-            "custom_domain": os.environ.get("AWS_S3_CUSTOM_DOMAIN") or None,
-            "querystring_auth": False,
-            "file_overwrite": False,
-            "default_acl": None,
-            "object_parameters": {"CacheControl": "max-age=86400"},
-        },
-    }
-
 STORAGES = {
-    "default": default_storage,
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     },
@@ -183,24 +151,8 @@ if EMAIL_USE_TLS and EMAIL_USE_SSL:
     raise RuntimeError("Enable either EMAIL_USE_TLS or EMAIL_USE_SSL, not both.")
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Connect <noreply@localhost>")
-if DEBUG:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    email_required_settings = (
-        "EMAIL_HOST",
-        "EMAIL_HOST_USER",
-        "EMAIL_HOST_PASSWORD",
-        "DEFAULT_FROM_EMAIL",
-    )
-    missing_email_settings = [
-        name for name in email_required_settings if not os.environ.get(name)
-    ]
-    if missing_email_settings:
-        raise RuntimeError(
-            "Configure production SMTP settings: "
-            + ", ".join(missing_email_settings)
-        )
+# Verification and password-reset emails will not be delivered until SMTP is configured.
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 SECURE_SSL_REDIRECT = not DEBUG
 SESSION_COOKIE_SECURE = not DEBUG
